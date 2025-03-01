@@ -473,6 +473,672 @@ try (FileWriter writer = new FileWriter("arquivo.txt")) {
 
 Quando se utiliza o `try-with-resources`, o método `close()` é chamado automaticamente no final do bloco try, garantindo que os recursos sejam liberados corretamente. Como o `close()` do `BufferedWriter` já inclui uma chamada ao `flush()`, geralmente não é necessário chamar `flush()` explicitamente dentro do bloco try. 
 
+### 3. Implementação das Classes para trabalhar com Arquivos de Texto na SmartList
+
+#### Classe `ListaDeCompras`
+
+```java
+public class ListaDeCompras {
+
+    //código omitido
+
+    public void salvarEmArquivoTexto(String nomeArquivo)  {
+        if(!produtos.isEmpty()){
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(nomeArquivo, false))) {
+                for (Produto produto : produtos) {
+                    writer.write(produto.getNome() + " - " + produto.getQuantidade() + " - "+produto.getPreco());
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                System.out.println("Erro ao salvar o arquivo: "+e.getMessage());
+            }
+        }else{
+            System.out.println("Lista vazia!");
+        }
+    }
+
+
+    public void carregarDeArquivoTexto(String nomeArquivo)  {
+        produtos.clear();
+        try (BufferedReader reader = new BufferedReader(new FileReader(nomeArquivo))) {
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                String[] partes = linha.split(" - ");
+                produtos.add(new Produto(partes[0], Integer.parseInt(partes[1]), Double.parseDouble(partes[2])));
+            }
+            System.out.println("Lista do Arquivo de Texto");
+                        System.out.println(this.toString());
+
+        } catch (IOException e) {
+            System.out.println("Erro ao carregar o arquivo: "+e.getMessage());
+        }
+    }
+
+	//Código omitido
+}
+```
+
+#### Classe `ListaDeComprasView`
+
+Adaptar o método `exibirMenu()` para mostrar as novas funcionalidades:
+
+```java
+public void exibirMenu() {
+    System.out.println("\n--- Gerenciador de Lista de Compras ---");
+    System.out.println("1. Adicionar Produto");
+    System.out.println("2. Remover Produto");
+    System.out.println("3. Imprimir Lista");
+    System.out.println("4. Salvar Lista em Arquivo de Texto");
+    System.out.println("5. Carregar Lista de Arquivo de Texto");
+    System.out.println("0. Sair");
+    System.out.print("Escolha uma opção: ");
+}
+```
+
+#### Classe `ListaDeComprasController`
+
+Adequar o método `processarOpcao()`:
+
+```java
+private void processarOpcao(int opcao) {
+    switch (opcao) {
+        case 1:
+            adicionarProduto();
+            break;
+        case 2:
+            removerProduto();
+            break;
+        case 3:
+            exibirLista();
+            break;
+        case 4:
+            salvarEmAqrTexto();
+            break;
+        case 5:
+            carregarDeArqTexto();
+            break;    
+        case 0:
+            view.exibirMensagem("Saindo...");
+            break;
+        default:
+            view.exibirMensagem("Opção inválida!");
+    }
+}
+```
+Ainda na classe  `ListaDeComprasController`, implementar os métodos `salvarEmAqrTexto()` e `carregarDeArqTexto()`:
+
+```java
+private void salvarEmAqrTexto() {
+    model.salvarEmArquivoTexto("lista_compras.txt"); //ou "D:/dev/lista_compras.txt"
+
+}
+
+private void carregarDeArqTexto() {
+    model.carregarDeArquivoTexto("lista_compras.txt"); //ou "D:/dev/lista_compras.txt"
+
+}
+```
+#### Testando o programa
+
+Acessar o menu Run > Run 'Main.java' ou pressione Shift + F10. 
+
+Realizar testes como: adicionar produtos na lista, salvar em arquivo texto, verificar se o arquivo foi criado, abrir o arquivo com o bloco de notas para ver o conteúdo, por fim, carregar a lista a partir do arquivo texto.
+
+--- 
+## Abertura e Criação de Arquivos Binários
+
+Para manipular arquivos binários em Java, é necessário primeiro abrir ou criar o arquivo. Isso pode ser feito usando classes como `File`, `FileInputStream` e `FileOutputStream`.
+
+### Criação de um Novo Arquivo para Gravação
+
+```java
+File file = new File("novo_arquivo.bin");
+FileOutputStream outputStream = new FileOutputStream(file);
+```
+
+### Gravação de Arquivos Binários
+A gravação de arquivos binários pode ser feita de duas formas principais:
+
+- **Gravação de tipos primitivos (int, double, boolean, etc.) e Strings:** Usa-se a classe `DataOutputStream` em conjunto com `FileOutputStream`.
+- **Gravação de objetos inteiros:** Usa-se a classe `ObjectOutputStream` junto com `FileOutputStream`.
+
+### 1. Gravação de Bytes (Tipos Primitivos e String):
+```java
+String nome = "Maria";
+int idade = 22;
+
+try (DataOutputStream data = new DataOutputStream(new FileOutputStream("arquivo.bin"))) {
+    data.writeUTF(nome);
+    data.writeInt(idade);
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+A classe `DataOutputStream` pode ser usada para escrever dados primitivos e strings em um fluxo de saída binário. Alguns métodos úteis incluem:
+- writeChar()
+- writeDouble()
+- writeFloat()
+- writeInt()
+- writeUTF()
+
+### 2. Gravação de Objetos Inteiros (usando ObjectOutputStream):
+```java
+// A variável "pessoas" é um List<Pessoa>
+try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("pessoas.bin"))) { 
+    oos.writeObject(pessoas); 
+} catch (IOException e) {  
+    e.printStackTrace();
+}
+```
+Para gravar um objeto inteiro, a classe do objeto deve implementar a interface `Serializable`. Isso permite que os objetos dessa classe sejam serializados. O método `writeObject()` escreve o objeto no fluxo.
+
+### Leitura de Arquivos Binários
+Para abrir um arquivo binário existente para leitura, usa-se:
+```java
+File file = new File("arquivo.bin");
+FileInputStream inputStream = new FileInputStream(file);
+```
+
+Tipos de leitura:
+
+#### 1. Leitura de Bytes:
+```java
+StringBuilder sb = new StringBuilder();
+
+try (DataInputStream data = new DataInputStream(new FileInputStream("arquivo.bin"))) {
+    sb.append(data.readUTF()).append("\n")
+      .append(data.readInt()).append("\n");
+} catch (IOException e) {
+    e.printStackTrace();
+}
+
+return sb.toString();
+```
+#### 2. Leitura de Objetos:
+```java
+// A variável "pessoas" é um List<Pessoa>
+try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("pessoas.bin"))) {
+    pessoas = (List<Pessoa>) ois.readObject();
+} catch (IOException | ClassNotFoundException e) {
+    e.printStackTrace();
+}
+```
+
+---
+## Serialização de Objetos
+
+A serialização é o processo de transformar um objeto em uma sequência de bytes, tornando possível:
+- Armazená-lo em um arquivo
+- Transmiti-lo pela rede
+- Persisti-lo em um banco de dados
+
+### Por que serializar?
+A serialização permite que um objeto seja recuperado posteriormente, mesmo após o programa ser encerrado. Além disso, é útil para troca de informações entre sistemas.
+
+#### Salvando e Recuperando um Objeto em Arquivo
+
+Quando se serializa um objeto, é possível:
+- Gravar o objeto → Ele será armazenado como bytes no disco.
+- Ler o objeto → Ele será convertido de volta no objeto original (desserialização).
+
+### Serialização em Java
+
+A serialização só é possível se a classe implementar a interface `Serializable`, do pacote `java.io`.
+```java
+import java.io.Serializable;
+
+public class Pessoa implements Serializable {
+
+    private static final long serialVersionUID = 1L; // Identificador de versão
+
+    private String nome;
+    private int idade;
+    private transient String senha; // Atributo transient
+
+    public Pessoa(String nome, int idade, String senha) {
+        this.nome = nome;
+        this.idade = idade;
+        this.senha = senha;
+    }
+
+    @Override
+    public String toString() {
+        return "Pessoa{nome='" + nome + "', idade=" + idade + ", senha='[TRANSIENT]'}";
+    }
+}
+```
+#### Considerações Importantes sobre Serialização
+
+- **transient:** Um atributo marcado como transient não será serializado. É útil para informações sensíveis ou que não precisam ser armazenadas.
+- **serialVersionUID:** Um identificador único para a versão da classe serializada. Se a classe mudar e o serialVersionUID não for compatível, pode ocorrer erro ao desserializar.
+Se não for definido, o Java gerará um automaticamente, o que pode causar incompatibilidades futuras.
+
+### 4. Implementação das Classes para trabalhar com Arquivos de Binários na SmartList
+
+Para a SmartList, o tipo de persitência adotado será objetos inteiros. Para isso, modificar a classe Produto para implementar a classe `Serealizable`. 
+
+#### Classe Produto
+
+```java
+package br.com.model;
+import java.io.Serializable;
+
+public class Produto implements Serializable{
+    //Código omitido
+}
+```
+
+#### Classe ListaDeCompras
+```java
+public class ListaDeCompras {
+    //Código omitido
+
+    public void salvarEmArquivoBinario(String nomeArquivo) {
+        if(!produtos.isEmpty()){
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(nomeArquivo))) {
+                oos.writeObject(produtos);
+            } catch (IOException e) {
+                System.out.println("Erro ao salvar o arquivo: "+e.getMessage());
+            }
+        }else{
+            System.out.println("Lista vazia!");
+        }
+    }
+
+    @SuppressWarnings("unchecked") // Suprime avisos de operações não verificadas, esta anotação é usada para silenciar aviso do compilador.
+    public void carregarDeArquivoBinario(String nomeArquivo) {
+        produtos.clear();
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(nomeArquivo))) {
+            produtos = (List<Produto>) ois.readObject();
+        } catch (ClassNotFoundException | IOException e){
+            System.out.println("Erro ao salvar o arquivo: "+e.getMessage());
+        }
+    }
+    //Código omitido
+}
+```
+
+#### Classe ListaDeComprasView
+
+```java
+public class ListaDeComprasView {
+    private Scanner scanner;
+
+    public ListaDeComprasView() {
+        scanner = new Scanner(System.in);
+    }
+
+    public void exibirMenu() {
+        System.out.println("\n--- Gerenciador de Lista de Compras ---");
+        System.out.println("1. Adicionar Produto");
+        System.out.println("2. Remover Produto");
+        System.out.println("3. Imprimir Lista");
+        System.out.println("4. Salvar Lista em Arquivo de Texto");
+        System.out.println("5. Carregar Lista de Arquivo de Texto");
+        System.out.println("6. Salvar Lista em Arquivo Binário");
+        System.out.println("7.Carregar Lista de Arquivo Binário");
+        System.out.println("0. Sair");
+        System.out.print("Escolha uma opção: ");
+    }
+
+    //Código omitido
+}
+```
+#### Classe ListaDeComprasController
+
+```java
+public class ListaDeComprasController {
+    //Código omitido
+
+    private void processarOpcao(int opcao) {
+        switch (opcao) {
+            case 1:
+                adicionarProduto();
+                break;
+            case 2:
+                removerProduto();
+                break;
+            case 3:
+                exibirLista();
+                break;
+            case 4:
+                salvarEmAqrTexto();
+                break;
+            case 5:
+                carregarDeArqTexto();
+                break;
+            case 6:
+                salvarEmArquivoBinario();
+                break;
+            case 7:
+                carregarDeArquivoBinario();
+                break;
+            case 0:
+                view.exibirMensagem("Saindo...");
+                break;
+            default:
+                view.exibirMensagem("Opção inválida!");
+        }
+    }
+
+    //Código omitido
+
+    private void salvarEmArquivoBinario(){
+        model.salvarEmArquivoBinario("lista_compras.bin");
+    }
+
+    private void carregarDeArquivoBinario(){
+        model.carregarDeArquivoBinario("lista_compras.bin");
+    }
+}
+```
+#### Testando o programa
+
+Acessar o menu Run > Run 'Main.java' ou pressione Shift + F10. 
+
+Realizar testes como: adicionar produtos na lista, salvar em arquivo binário, verificar se o arquivo foi criado, por fim, carregar a lista a partir do arquivo binário.
+
+---
+## JSON (JavaScript Object Notation)
+
+JSON é um formato de troca de dados que é fácil para humanos lerem e escreverem, e fácil para máquinas interpretarem e gerarem. Ele é muito utilizado para transmitir dados entre um servidor e uma aplicação web, ou entre diferentes partes de um sistema. Possui uma estrutura hierárquica que permite organizar objetos e arrays aninhados.
+
+### Sintaxe do JSON
+
+O JSON é composto por:
+
+#### Objetos
+- Um objeto é uma coleção de pares chave-valor, onde cada chave é uma string e o valor pode ser uma string, número, booleano, array, outro objeto ou `null`.
+- Os objetos são delimitados por chaves `{}`.
+- Exemplo:
+  ```json
+  {
+    "nome": "Maria",
+    "idade": 22,
+    "estudante": false,
+    "endereco": {
+      "rua": "Rua das Araras",
+      "numero": 998,
+      "cidade": "Hermoso do Sul"
+    }
+  }
+  ```
+
+#### Arrays
+- Um array é uma lista ordenada de valores, que podem ser strings, números, booleanos, objetos, outros arrays ou `null`.
+- Os arrays são delimitados por colchetes `[]`.
+- Exemplo:
+```json
+[
+  {"nome": "Maria", "idade": 22},
+  {"nome": "João", "idade": 34},
+  {"nome": "Ana", "idade": 27}
+]
+```
+---
+
+### 5.Trabalhando com JSON no Projeto SmartList
+
+Para trabalhar com JSON neste projeto, será utilizada a biblioteca `Jackson`. Ela possui métodos para converter objetos Java para JSON (serialização) e JSON para objetos Java (desserialização).
+
+#### Adicionando a Dependência do `Jackson`
+Para usar a biblioteca `Jackson`, adicione a seguinte dependência no arquivo `pom.xml`:
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.18.2</version>
+    </dependency>
+</dependencies>
+```
+
+Após adicionar uma dependência no arquivo `pom.xml`, é necessário realizar algumas etapas para garantir que a dependência seja corretamente baixada e disponibilizada para uso no projeto:
+- **Salvar o Arquivo `pom.xml`:** Após adicionar a dependência, salve o arquivo `pom.xml`. Isso garante que as alterações sejam registradas.
+- **Atualizar o Projeto no Maven:** O Maven precisa atualizar o projeto para baixar a nova dependência e configurar o classpath corretamente. No IntelliJ IDEA, abra o arquivo `pom.xml` e pressione CTRL+SHIFT+O, ou clique na opção destacada na imagem abaixo:
+  
+   ![image](https://github.com/user-attachments/assets/3e573f87-60ec-4235-90be-6640ac91337e)
+
+
+### Configurando a Classe Produto
+Para que o `Jackson` consiga realizar a desserialização (converter JSON para um objeto Java), a classe Produto deve ter um construtor padrão (sem argumentos). Esse construtor é necessário para o Jackson criar uma instância da classe e preencher os campos usando os setters ou acessar diretamente os campos (mesmo que sejam privados) usando reflexão.
+
+#### Classe Produto
+
+```java
+public class Produto implements Serializable {
+    private String nome;
+    private int quantidade;
+    private double preco;
+
+    // Construtor padrão (sem argumentos)
+    public Produto() {
+    }
+
+    // Construtor com argumentos
+    public Produto(String nome, int quantidade, double preco) {
+        this.nome = nome;
+        this.quantidade = quantidade;
+        this.preco = preco;
+    }
+
+    // Getters e Setters (omitidos)
+}
+```
+
+#### Classe ListaDeCompras
+
+```java
+public class ListaDeCompras {
+    private List<Produto> produtos;
+
+    //código omitido
+
+    public void salvarEmArquivoJson(String nomeArquivo) {
+        if(!produtos.isEmpty()){
+            try  {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.enable(SerializationFeature.INDENT_OUTPUT); // Formata o JSON para ser legível
+                objectMapper.writeValue(new File(nomeArquivo), produtos);
+            } catch (IOException e) {
+                System.out.println("Erro ao salvar o arquivo: "+e.getMessage());
+            }
+        }else{
+            System.out.println("Lista vazia!");
+        }
+
+    }
+
+    public void carregarDeArquivoJson(String nomeArquivo)  {
+        produtos.clear();
+        try  {
+            ObjectMapper objectMapper = new ObjectMapper();
+            produtos = objectMapper.readValue(new File(nomeArquivo), objectMapper.getTypeFactory().constructCollectionType(List.class, Produto.class));
+        } catch (IOException e){
+            System.out.println("Erro ao salvar o arquivo: "+e.getMessage());
+        }
+    }
+    //Código omitido
+}
+```
+
+#### Classe ListaDeCompraView
+```java
+public class ListaDeComprasView {
+    private Scanner scanner;
+
+    public ListaDeComprasView() {
+        scanner = new Scanner(System.in);
+    }
+
+    public void exibirMenu() {
+        System.out.println("\n--- Gerenciador de Lista de Compras ---");
+        System.out.println("1. Adicionar Produto");
+        System.out.println("2. Remover Produto");
+        System.out.println("3. Imprimir Lista");
+        System.out.println("4. Salvar Lista em Arquivo de Texto");
+        System.out.println("5. Carregar Lista de Arquivo de Texto");
+        System.out.println("6. Salvar Lista em Arquivo Binário");
+        System.out.println("7. Carregar Lista de Arquivo Binário");
+        System.out.println("8. Salvar Lista em Arquivo JSON");
+        System.out.println("9. Carregar Lista de Arquivo JSON");
+        System.out.println("0. Sair");
+        System.out.print("Escolha uma opção: ");
+    }
+
+    //Código omitido
+}
+```
+
+#### Classe ListaDeComprasController
+
+```java
+public class ListaDeComprasController {
+    //Código omitido
+
+    private void processarOpcao(int opcao) {
+        switch (opcao) {
+            case 1:
+                adicionarProduto();
+                break;
+            case 2:
+                removerProduto();
+                break;
+            case 3:
+                exibirLista();
+                break;
+            case 4:
+                salvarEmAqrTexto();
+                break;
+            case 5:
+                carregarDeArqTexto();
+                break;
+            case 6:
+                salvarEmArquivoBinario();
+                break;
+            case 7:
+                carregarDeArquivoBinario();
+                break;
+            case 8:
+                salvarEmArquivoJson();
+                break;
+            case 9:
+                carregarDeArquivoJson();
+                break;
+            case 0:
+                view.exibirMensagem("Saindo...");
+                break;
+            default:
+                view.exibirMensagem("Opção inválida!");
+        }
+    }
+
+    //Código omitido
+
+    private void salvarEmArquivoJson(){
+        model.salvarEmArquivoJson("lista_compras.json");
+    }
+
+    private void carregarDeArquivoJson(){
+        model.carregarDeArquivoJson("lista_compras.json");
+    }
+}
+```
+
+#### Testando o programa
+
+Acessar o menu Run > Run 'Main.java' ou pressione Shift + F10. 
+
+Realizar testes como: adicionar produtos na lista, salvar em arquivo json, verificar se o arquivo foi criado, abrir o arquivo com o bloco de notas para ver o conteúdo (que deve ser semelhante ao json abaixo), por fim, carregar a lista a partir do arquivo json.
+
+```json
+[
+  {
+    "nome": "Arroz",
+    "quantidade": 2,
+    "preco": 10.5
+  },
+  {
+    "nome": "Feijão",
+    "quantidade": 3,
+    "preco": 8.0
+  }
+]
+```
+--- 
+## Manipulando Coleções com Streams em Java
+
+Uma Stream em Java representa uma sequência de elementos, permitindo a execução de operações em cadeia. Elas não armazenam dados diretamente, mas sim fornecem um mecanismo para processar dados em um fluxo contínuo. Em vez de iterar sobre cada elemento individualmente, as streams permitem aplicar uma sequência de operações a um conjunto de dados, resultando em um novo conjunto. Além disso, elas simplificam a manipulação e transformação de dados e permitem agrupar elementos com base em critérios específicos. 
+
+A API Streams, introduzida no Java 8, é inspirada em conceitos da programação funcional. Alguns desses conceitos são: 
+    • **Tratamento de dados de forma declarativa:** em vez de especificar passo a passo como iterar sobre uma coleção e realizar operações, as Streams permitem declarar o que deseja fazer com os dados, e a biblioteca se encarrega de como realizar essa operação. Desta forma, é possível encadear diversas operações em um fluxo de dados de forma declarativa, facilitando a criação de pipelines de processamento complexos, mas legíveis. 
+    • **Imutabilidade:** As operações em Streams geralmente retornam novas coleções, em vez de modificar a original. Isso ajuda a evitar efeitos colaterais e torna o código mais seguro e previsível. 
+    • **Funções de alta ordem:** Streams utilizam funções de alta ordem (como `map`, `filter`, `reduce`) para transformar e manipular dados. Essas funções aceitam outras funções como parâmetro, permitindo uma grande flexibilidade na criação de pipelines de processamento. Mais informações sobre programação funcional [aqui](https://www.alura.com.br/artigos/programacao-funcional-o-que-e?srsltid=AfmBOopwAbT_H2BnFmwFSfLpw2yFoLjEJJCYEz6BkjQqgIrVsgeBumqD) e [aqui](https://medium.com/@marcelomg21/programação-funcional-teoria-e-conceitos-975375cfb010). 
+
+#### Entendendo uma Stream
+
+Analisando o exemplo a seguir:
+
+![image](https://github.com/user-attachments/assets/a8696504-7ba5-4c1a-acce-c5d39207547a)
+
+- **1. Criação de uma Stream:** A chamada a `numbers.stream()` transforma a lista de números em uma Stream, que é uma sequência de elementos sobre a qual podemos aplicar operações.
+- **2. Composição de funções:**
+    - `filter`: função de alta ordem que recebe um predicado (uma função que retorna um booleano) e retorna um novo Stream contendo apenas os elementos que satisfazem o predicado. Neste caso, os números pares. 
+    - `map`: função também de alta ordem que recebe uma função que transforma cada elemento da Stream. Neste caso, cada número é multiplicado por 2. 
+
+- **3. Coleta dos resultados:** A operação `collect` transforma o Stream de volta em uma lista, coletando os resultados das operações anteriores.
+
+#### Observações adicionais:
+    • Em vez de escrever loops explícitos, foi dito o que deveria ser feito (forma declarativa). 
+    • Código mais fácil de entender e manter. 
+    • Pode-se encadear diversas operações em fluxo contínuo. 
+    • Foram usadas funções de alta ordem para processar e manipular os dados. 
+    • O resultado é uma nova lista, mantendo a lista original (imutabilidade). 
+    • As operações intermediárias (`filter` e `map`) são executadas apenas quando a operação terminal é invocada. 
+
+### Exemplos com e sem Stream:
+
+| Com                             | Sem                             |
+|---------------------------------|---------------------------------|
+| ![image](https://github.com/user-attachments/assets/233e844d-faf0-44ee-b4ba-6f7d84b6d3cb) |  ![image](https://github.com/user-attachments/assets/a469e1c1-203a-432e-bc0b-eaeac8ffcfee)|
+
+### operador `→`
+
+Chamado de operador lambda, é uma característica da programação funcional. É usado para criar expressões lambda, que são funções anônimas. 
+
+As funções anônimas, são funções que não possuem um nome explícito. São definidas diretamente no local onde são utilizadas, geralmente como parte de uma expressão maior. Muito usadas quando se trata de operações simples ou quando a função é utilizada apenas uma vez. No exemplo, o operador `→` permitiu definir as funções de filtragem e de mapeamento, utilizando expressão lambda.
+
+#### Estrutura básica de uma expressão Lambda
+
+| Sintaxe Geral                                      | Exemplos                                                                 |
+|----------------------------------------------------|--------------------------------------------------------------------------|
+| `(param1, param2, …) -> { corpo_da_expressão }`    |                                                                          |
+| - **Parâmetros:** Dentro de parênteses, são as entradas da função lambda. | - **Lambda sem parâmetros:** `() -> System.out.println("Olá")`           |
+| - **Operador:** `->` separa os parâmetros do corpo da expressão.          | - **Lambda com um parâmetro:** `(a) -> a * a`                            |
+| - **Corpo da Expressão:** É o código que será executado.                  | - **Lambda com múltiplos parâmetros:** `(a, b) -> a + b`                 |
+
+#### Criando e utilizando Streams
+
+Streams podem ser criados a partir de diversas fontes de dados, como listas, arrays ou arquivos. O método stream() é usado para converter uma coleção em uma stream:
+- **1. Criação da Stream:** realizando com o método `stream()` em uma coleção como `List` ou `Set`.
+- **2. Operações Intermediárias:** Filtram, mapeam e transformam os dados do stream.
+- **3. Operações Terminais:** Realizam ações como coletar os dados modificados em uma nova coleção.
+
+#### Métodos comuns em Streams - Operações intermediárias:
+| Operação                                                                 | Exemplo                                                                                       |
+|-------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
+| **filter()**: filtra elementos com base em uma condição. Sintaxe: `stream.filter(elemento -> condição);`                  |![image](https://github.com/user-attachments/assets/8468ba54-e03a-4ea2-aaf4-06d307fb94d5)     |                        
+| **map()**: aplica uma função a cada elemento e retorna uma Stream com os resultados. | ![image](https://github.com/user-attachments/assets/a8d22846-eba3-44e0-a409-d47fe1735ac6) |
+| Sintaxe: `stream.map(elemento -> transformacao);`                       |                       |
+|                                                                         |                                                                                    |
+| **sorted()**: ordena os elementos da Stream.                            | ![image](https://github.com/user-attachments/assets/871f4656-b022-42e7-87d3-4b546ddf6193) |
+| Sintaxe:                                                                |                   |
+| - `stream.sorted()` // sem parâmetros                                   |                                               |
+| - `stream.sorted((e1, e2) -> comparador)` // com comparador que define a lógica de comparação |                                                                       |
+| - `stream.sorted(Comparator.comparing(Class::method))` // com método de referência para o comparador |                                                          |
+|                                                                         |                                                                                    |
+
 ---
 ## Conclusão
 
