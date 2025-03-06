@@ -1217,7 +1217,7 @@ public class ListaDeCompras {
     // Imprime a lista de produtos em ordem alfabética
     public void imprimirLista() {
         produtos.stream()
-                .sorted(Comparator.comparing(Produto::getNome)) // Ordena por nome
+                .sorted(Comparator.comparing(p -> p.getNome().toLowerCase())) // Ordena por nome
                 .forEach(System.out::println);
     }
 
