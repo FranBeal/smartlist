@@ -1126,18 +1126,473 @@ Streams podem ser criados a partir de diversas fontes de dados, como listas, arr
 - **3. Operações Terminais:** Realizam ações como coletar os dados modificados em uma nova coleção.
 
 #### Métodos comuns em Streams - Operações intermediárias:
-| Operação                                                                 | Exemplo                                                                                       |
-|-------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
-| **filter()**: filtra elementos com base em uma condição. Sintaxe: `stream.filter(elemento -> condição);`                  |![image](https://github.com/user-attachments/assets/8468ba54-e03a-4ea2-aaf4-06d307fb94d5)     |                        
-| **map()**: aplica uma função a cada elemento e retorna uma Stream com os resultados. | ![image](https://github.com/user-attachments/assets/a8d22846-eba3-44e0-a409-d47fe1735ac6) |
-| Sintaxe: `stream.map(elemento -> transformacao);`                       |                       |
-|                                                                         |                                                                                    |
-| **sorted()**: ordena os elementos da Stream.                            | ![image](https://github.com/user-attachments/assets/871f4656-b022-42e7-87d3-4b546ddf6193) |
-| Sintaxe:                                                                |                   |
-| - `stream.sorted()` // sem parâmetros                                   |                                               |
-| - `stream.sorted((e1, e2) -> comparador)` // com comparador que define a lógica de comparação |                                                                       |
-| - `stream.sorted(Comparator.comparing(Class::method))` // com método de referência para o comparador |                                                          |
-|                                                                         |                                                                                    |
+
+- **filter()**: filtra elementos com base em uma condição.
+	#### Sintaxe:
+	`stream.filter(elemento -> condição);`
+	#### Exemplo:
+	![image](https://github.com/user-attachments/assets/8468ba54-e03a-4ea2-aaf4-06d307fb94d5)
+
+- **map()**: aplica uma função a cada elemento e retorna uma Stream com os resultados.
+  	#### Sintaxe:
+  	`stream.map(elemento -> transformacao);`
+  	#### Exemplo: 
+  	![image](https://github.com/user-attachments/assets/a8d22846-eba3-44e0-a409-d47fe1735ac6)
+
+- **sorted()**: ordena os elementos da Stream.
+	#### Sintaxe:
+	- `stream.sorted()` // sem parâmetros
+   	- `stream.sorted((e1, e2) -> comparador)` // com comparador que define a lógica de comparação
+   	- `stream.sorted(Comparator.comparing(Class::method))` // com método de referência para o comparador
+  	#### Exemplo:
+  	![image](https://github.com/user-attachments/assets/871f4656-b022-42e7-87d3-4b546ddf6193)
+
+#### Métodos comuns em Streams - Operações terminais:
+
+- **collect()**: coleta os elementos em uma coleção ou outra estrutura de dados, usando coletores.
+	#### Sintaxe:
+	- `Collectors.toList()`
+ 	- `Collectors.toSet()`
+	- `Collectors.joining(delimiter,prefix,sufix)`
+   	#### Exemplo:
+  	![image](https://github.com/user-attachments/assets/eadcf886-c2d3-4f8b-af20-7ee38ace61eb)
+
+- **forEach()**: executa uma ação para cada elemento.
+	#### Sintaxe:
+	`stream.forEach(elemento->ação)`
+	#### Exemplo:
+	![image](https://github.com/user-attachments/assets/dece7adf-4ed3-4ba3-a370-a358e2a681a6)
+
+- **reduce()**: reduz os elementos para um único valor, ideal para operações como soma e multiplicação.
+	#### Sintaxe:
+	- Pode usar um operador binário para combinar 2 elementos `(stream.reduce((a,b)->a+b))`
+ 	- e usar também um valor inicial para a acumulação `(stream.reduce(0, (a,b)->a+b))` 
+	#### Exemplo:
+	![image](https://github.com/user-attachments/assets/492af860-a89d-480f-9526-e9156af3b418)
+
+#### Operador `::`
+
+Conhecido como referência a método, é usado para referenciar métodos de forma direta para serem usados em operações de Stream, sem precisar escrever a expressão lambda completa. 
+
+##### Quando usar?
+
+- Referências a métodos estáticos - `Class::staticMethod`
+![image](https://github.com/user-attachments/assets/83051dc9-11e7-4973-b4c1-b2ac5d68c8da)
+
+- Referências a métodos de instância - `instance::instanceMethod` ou `Class::instanceMethod`
+![image](https://github.com/user-attachments/assets/621fd2a3-c9d8-4649-8e49-149b0137e6f7)
+
+- Referências a construtores - `Class::new`
+![image](https://github.com/user-attachments/assets/cb559422-feee-42e3-9150-4a642eac16f3)
+
+#### Exemplo de uso:
+| ![image](https://github.com/user-attachments/assets/cdce95b7-9a78-4684-ad54-4fd081db6791) | ![image](https://github.com/user-attachments/assets/b972fc3a-82b0-432f-8333-cbbfb4163cb2)| 
+| ------------------------------------------------------------------------------------------| -----------------------------------------------------------------------------------------| 
+
+Aplicando os conceitos de Stream para manipulações coleções no desenvolvimento das funcionalidades: 10. Filtrar Produtos por Quantidade Mínima, 12.Calcular Valor Total da Lista e 
+13.Imprimir Lista em Ordem Alfabética:
+
+#### Classe ListaDeCompras
+
+```java
+public class ListaDeCompras {
+    private List<Produto> produtos;
+
+    //Código omitido
+
+    // Filtra produtos com quantidade mínima usando streams
+    public List<Produto> filtrarPorQuantidadeMinima(int quantidadeMinima) {
+        return produtos.stream()
+                .filter(p -> p.getQuantidade() >= quantidadeMinima)
+                .collect(Collectors.toList());
+    }
+
+    // Calcula o valor total da lista usando streams
+    public double calcularValorTotal() {
+        return produtos.stream()
+                .mapToDouble(p -> p.getQuantidade() * p.getPreco())
+                .sum();
+    }
+
+    // Imprime a lista de produtos em ordem alfabética
+    public void imprimirLista() {
+        produtos.stream()
+                .sorted(Comparator.comparing(Produto::getNome)) // Ordena por nome
+                .forEach(System.out::println);
+    }
+
+
+    //código omitido
+}
+```
+
+#### Classe ListaDeComprasView
+```java
+public class ListaDeComprasView {
+    private Scanner scanner;
+
+    public ListaDeComprasView() {
+        scanner = new Scanner(System.in);
+    }
+
+    public void exibirMenu() {
+        System.out.println("\n--- Gerenciador de Lista de Compras ---");
+        System.out.println("1. Adicionar Produto");
+        System.out.println("2. Remover Produto");
+        System.out.println("3. Imprimir Lista");
+        System.out.println("4. Salvar Lista em Arquivo de Texto");
+        System.out.println("5. Carregar Lista de Arquivo de Texto");
+        System.out.println("6. Salvar Lista em Arquivo Binário");
+        System.out.println("7. Carregar Lista de Arquivo Binário");
+        System.out.println("8. Salvar Lista em Arquivo JSON");
+        System.out.println("9. Carregar Lista de Arquivo JSON");
+        System.out.println("10. Filtrar Produtos por Quantidade Mínima ");
+        System.out.println("11. Calcular Valor Total da Lista");
+        System.out.println("12. Imprimir Lista em Ordem Alfabética");
+        System.out.println("0. Sair");
+        System.out.print("Escolha uma opção: ");
+    }
+
+    //Código omitido
+
+    public int lerQuantidadeMinima() {
+        int quantidade = 0;
+        boolean quantidadeValida = false;
+        while (!quantidadeValida) {
+            try {
+                System.out.print("Quantidade mínima: ");
+                quantidade = scanner.nextInt();
+                scanner.nextLine();
+                quantidadeValida = true;
+            } catch (InputMismatchException e) {
+                System.out.println("Erro: Quantidade mínima deve ser um número inteiro. Tente novamente.");
+                scanner.nextLine(); // Limpa o buffer do scanner
+            }
+        }
+        return quantidade;
+    }
+}
+```
+
+#### Classe ListaDeComprasController
+
+```java
+public class ListaDeComprasController {
+    // Código omitido
+
+    private void processarOpcao(int opcao) {
+        switch (opcao) {
+            case 1:
+                adicionarProduto();
+                break;
+            case 2:
+                removerProduto();
+                break;
+            case 3:
+                exibirLista();
+                break;
+            case 4:
+                salvarEmAqrTexto();
+                break;
+            case 5:
+                carregarDeArqTexto();
+                break;
+            case 6:
+                salvarEmArquivoBinario();
+                break;
+            case 7:
+                carregarDeArquivoBinario();
+                break;
+            case 8:
+                salvarEmArquivoJson();
+                break;
+            case 9:
+                carregarDeArquivoJson();
+                break;
+            case 10:
+                filtrarPorQuantidadeMinima();
+                break;
+            case 11:
+                calcularValorTotal();
+                break;
+            case 12:
+                imprimirLista();
+                break;
+            case 0:
+                view.exibirMensagem("Saindo...");
+                break;
+            default:
+                view.exibirMensagem("Opção inválida!");
+        }
+    }
+
+    //Código omitido
+
+    private void filtrarPorQuantidadeMinima(){
+        int quantidadeMinima = view.lerQuantidadeMinima();
+        System.out.println(model.filtrarPorQuantidadeMinima(quantidadeMinima).toString());
+    }
+
+    private void calcularValorTotal(){
+        System.out.println("Valor Total R$ "+model.calcularValorTotal());
+    }
+
+    private void imprimirLista(){
+        model.imprimirLista();
+        System.out.println("Valor Total R$ "+model.calcularValorTotal());
+    }
+
+}
+```
+
+#### Testando o programa
+
+Acessar o menu Run > Run 'Main.java' ou pressione Shift + F10. 
+
+Realizar testes como: adicionar produtos na lista, acessar a funcionalidade 10, informar uma quantidade mínima e verificar o resultado; acessar as funcionalidades 11 e 12 e verificar os resultados.
+
+## Melhorando/Refatorando o Código
+
+É possível melhorar o códogo da SmartList construído até o momento. Uma dessas melhorias é a aplicação do padrão de projeto `Singleton`, para garantir que apenas uma instância da lista de compras seja criada durante a execução do programa. Para isso, as seguintes modificações devem ser feitas:
+
+#### Classe ListaDeCompras
+```java
+public class ListaDeCompras {
+    private static ListaDeCompras instancia;
+    private List<Produto> produtos;
+
+    public ListaDeCompras() {
+        produtos = new ArrayList<>();
+    }
+
+    public static ListaDeCompras getInstancia() {
+        if (instancia == null) {
+            instancia = new ListaDeCompras();
+        }
+        return instancia;
+    }
+    //Código omitido
+}
+```
+
+#### Classe Main
+```java
+public class Main {
+    public static void main(String[] args) {
+        //ListaDeCompras model = new ListaDeCompras();
+        ListaDeCompras model = ListaDeCompras.getInstancia();
+        
+        //Código omitido
+    }
+}
+```
+
+Outra melhoria possível é permitir que o usuário escolha dinamicamente o método de persistência (texto, binário, JSON ), para isso, pode-se usar o padrão Strategy para encapsular cada método em uma classe separada. Para isso, será criada a interface `PersistenciaStrategy` a seguir:
+
+#### Interface PersistenciaStrategy
+
+```java
+package br.com.model;
+
+import java.util.List;
+
+public interface PersistenciaStrategy {
+    void salvar(List<Produto> produtos, String caminhoArquivo);
+    List<Produto> carregar(String caminhoArquivo);
+}
+```
+
+Na sequência, as classes que implementam a interface:
+
+#### Classe PersistenciaTexto
+
+```java
+public class PersistenciaTexto implements PersistenciaStrategy{
+    @Override
+    public void salvar(List<Produto> produtos, String nomeArquivo) {
+
+        if(produtos != null && !produtos.isEmpty()){
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(nomeArquivo, false))) {
+                for (Produto produto : produtos) {
+                    writer.write(produto.getNome() + " - " + produto.getQuantidade() + " - "+produto.getPreco());
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                System.out.println("Erro ao salvar o arquivo: "+e.getMessage());
+            }
+        }else{
+            System.out.println("Lista vazia!");
+        }
+    }
+
+    @Override
+    public List<Produto> carregar(String nomeArquivo) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(nomeArquivo))) {
+            List<Produto> produtos = new ArrayList<>();
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                String[] partes = linha.split(" - ");
+                produtos.add(new Produto(partes[0], Integer.parseInt(partes[1]), Double.parseDouble(partes[2])));
+            }
+            System.out.println("Lista do Arquivo de Texto");
+            System.out.println(this.toString());
+            return produtos;
+        } catch (IOException e) {
+            System.out.println("Erro ao carregar o arquivo: "+e.getMessage());
+            return null;
+        }
+    }
+
+}
+```
+
+#### Classe PersistenciaBinario
+
+```java
+public class PersistenciaBinario implements PersistenciaStrategy{
+
+    @Override
+    public void salvar(List<Produto> produtos, String nomeArquivo) {
+        if(!produtos.isEmpty()){
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(nomeArquivo))) {
+                oos.writeObject(produtos);
+            } catch (IOException e) {
+                System.out.println("Erro ao salvar o arquivo: "+e.getMessage());
+            }
+        }else{
+            System.out.println("Lista vazia!");
+        }
+    }
+
+    @Override @SuppressWarnings("unchecked") // Suprime avisos de operações não verificadas, esta anotação é usada para silenciar aviso do compilador.
+    public List<Produto> carregar(String nomeArquivo)  {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(nomeArquivo))) {
+            List<Produto> produtos = new ArrayList<>();
+            produtos = (List<Produto>) ois.readObject();
+            return  produtos;
+        } catch (ClassNotFoundException | IOException e){
+            System.out.println("Erro ao salvar o arquivo: "+e.getMessage());
+            return null;
+        }
+
+    }
+
+}
+```
+
+#### Classe PersistenciaJson
+
+```java
+public class PersistenciaJson implements PersistenciaStrategy{
+    @Override
+    public void salvar(List<Produto> produtos, String nomeArquivo)  {
+        if(!produtos.isEmpty()){
+            try  {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.enable(SerializationFeature.INDENT_OUTPUT); // Formata o JSON para ser legível
+                objectMapper.writeValue(new File(nomeArquivo), produtos);
+            } catch (IOException e) {
+                System.out.println("Erro ao salvar o arquivo: "+e.getMessage());
+            }
+        }else{
+            System.out.println("Lista vazia!");
+        }
+    }
+
+    @Override
+    public List<Produto> carregar(String nomeArquivo)  {
+        try  {
+            List<Produto> produtos = new ArrayList<>();
+            ObjectMapper objectMapper = new ObjectMapper();
+            produtos = objectMapper.readValue(new File(nomeArquivo), objectMapper.getTypeFactory().constructCollectionType(List.class, Produto.class));
+            return produtos;
+        } catch (IOException e){
+            System.out.println("Erro ao salvar o arquivo: "+e.getMessage());
+            return null;
+        }
+
+    }
+}
+```
+
+Com as novas classes, adequar as classes `ListaDeCompras` e `ListaDeComprasController`.
+
+#### Classe ListaDeCompras
+
+```java
+public class ListaDeCompras {
+    private static ListaDeCompras instancia;
+    private List<Produto> produtos;
+    private PersistenciaStrategy estrategiaPersistencia;
+
+    // Código omitido
+
+
+    public void setEstrategiaPersistencia(PersistenciaStrategy estrategia) {
+        this.estrategiaPersistencia = estrategia;
+    }
+
+    public void salvar(String nomeArquivo)  {
+        estrategiaPersistencia.salvar(produtos, nomeArquivo);
+    }
+
+    public void carregar(String nomeArquivo) {
+        if(!Files.exists(Paths.get(nomeArquivo)))
+            System.out.println("Arquivo não encontrado!");
+        else
+            produtos = estrategiaPersistencia.carregar(nomeArquivo);
+    }
+    
+    // Código omitido
+}
+```
+
+#### Classe ListaDeCompras
+
+```java
+public class ListaDeComprasController {
+    
+	//Código omitido
+
+    private void salvarEmAqrTexto() {
+        model.setEstrategiaPersistencia(new PersistenciaTexto());
+        model.salvar("lista_compras.txt");
+    }
+
+    private void carregarDeArqTexto() {
+        model.setEstrategiaPersistencia(new PersistenciaTexto());
+        model.carregar("lista_compras.txt"); //ou "D:/dev/lista_compras.txt"
+    }
+
+    private void salvarEmArquivoBinario(){
+        model.setEstrategiaPersistencia(new PersistenciaBinario());
+        model.salvar("lista_compras.bin");
+    }
+
+    private void carregarDeArquivoBinario(){
+        model.setEstrategiaPersistencia(new PersistenciaBinario());
+        model.carregar("lista_compras.bin");
+    }
+
+    private void salvarEmArquivoJson(){
+        model.setEstrategiaPersistencia(new PersistenciaJson());
+        model.salvar("lista_compras.json");
+    }
+
+    private void carregarDeArquivoJson(){
+        model.setEstrategiaPersistencia(new PersistenciaJson());
+        model.carregar("lista_compras.json");
+    }
+
+    //Código omitido
+}
+```
+#### Testando o programa
+
+Acessar o menu Run > Run 'Main.java' ou pressione Shift + F10. 
+
+Realizar testes para verificar se as funcionalidades continuam funcionando como o esperado.
+
 
 ---
 ## Conclusão
