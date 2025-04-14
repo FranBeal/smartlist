@@ -887,6 +887,13 @@ System.out.println(arquivo2.exists()); // true (arquivo1 criou o arquivo físico
 - `new File()` é apenas uma "referência" ao caminho do arquivo, sem impacto no disco;
 - Várias instâncias com o mesmo caminho referem-se ao mesmo arquivo físico;
 - O arquivo só é criado/modificado quando você usa operações de I/O explícitas.
+	- Para garantir que o arquivo exista antes de usar, faça:
+```java
+File arquivo = new File("meuarquivo.dat");
+if (!arquivo.exists()) {
+    arquivo.createNewFile(); // Cria só se não existir
+}
+```
 ---
 ## JSON (JavaScript Object Notation)
 
