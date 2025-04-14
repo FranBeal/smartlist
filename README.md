@@ -839,6 +839,55 @@ Acessar o menu Run > Run 'Main.java' ou pressione Shift + F10.
 Realizar testes como: adicionar produtos na lista, salvar em arquivo binário, verificar se o arquivo foi criado, por fim, carregar a lista a partir do arquivo binário.
 
 ---
+
+### Detalhes importantes sobre a classe `File`:
+
+Quando se faz várias chamadas como `new File("meuarquivo.dat")` no código-fonte, não está criando o arquivo no disco, apenas instanciando um objeto Java que representa o caminho (meuarquivo.dat). Esse objeto não altera o arquivo físico.
+
+1. `new File()` não cria o arquivo no disco. O exemplo abaixo só cria um objeto em memória que aponta para o caminho meuarquivo.dat:
+```java
+File arquivo = new File("meuarquivo.dat");
+```
+O arquivo físico só é criado se você chamar métodos como:
+```java
+arquivo.createNewFile(); // Cria o arquivo vazio (se não existir)
+```
+2. Várias instâncias `new File()` referem-se ao mesmo arquivo físico. Se você criar múltiplos objetos `File` com o mesmo caminho, todos representarão o mesmo arquivo no disco:
+```java
+File arquivo1 = new File("meuarquivo.dat");
+File arquivo2 = new File("meuarquivo.dat");
+```
+- `arquivo1` e `arquivo2` são objetos diferentes na memória, mas ambos apontam para o mesmo arquivo físico.
+- Qualquer operação (leitura/escrita) feita por um afetará o outro (já que o alvo é o mesmo).
+
+3. Quando o arquivo físico é realmente criado/modificado?
+- Criação:
+```java
+arquivo.createNewFile(); // Método explícito
+new FileOutputStream("meuarquivo.dat"); // Cria/sobrescreve o arquivo
+```
+- Modificação:
+Só ocorre quando você usa classes de I/O (`FileWriter`, `FileInputStream`, etc.).
+- Exemplo:
+```java
+File arquivo1 = new File("dados.txt");
+File arquivo2 = new File("dados.txt");
+
+System.out.println(arquivo1 == arquivo2); // false (objetos diferentes na memória)
+System.out.println(arquivo1.equals(arquivo2)); // true (mesmo caminho)
+
+// O arquivo físico só é criado aqui:
+arquivo1.createNewFile(); // Agora "dados.txt" existe no disco!
+
+// Ambos os objetos continuam referindo-se ao mesmo arquivo:
+System.out.println(arquivo2.exists()); // true (arquivo1 criou o arquivo físico)
+```
+#### Resumindo:
+- A classe `File` é apenas uma representação abstrata do caminho no sistema de arquivos;
+- `new File()` é apenas uma "referência" ao caminho do arquivo, sem impacto no disco;
+- Várias instâncias com o mesmo caminho referem-se ao mesmo arquivo físico;
+- O arquivo só é criado/modificado quando você usa operações de I/O explícitas.
+---
 ## JSON (JavaScript Object Notation)
 
 JSON é um formato de troca de dados que é fácil para humanos lerem e escreverem, e fácil para máquinas interpretarem e gerarem. Ele é muito utilizado para transmitir dados entre um servidor e uma aplicação web, ou entre diferentes partes de um sistema. Possui uma estrutura hierárquica que permite organizar objetos e arrays aninhados.
