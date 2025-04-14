@@ -1046,6 +1046,8 @@ public class ListaDeCompras {
         produtos.clear();
         try  {
             ObjectMapper objectMapper = new ObjectMapper();
+            //getTypeFactory(): acessa o TypeFactory, que é responsável por construir tipos genéricos e complexos que Jackson não consegue inferir automaticamente (como listas, mapas...)
+	    //constructCollectionType(): cria um tipo genérico que representa uma coleção (List) de elementos do tipo Produto.
             produtos = objectMapper.readValue(new File(nomeArquivo), objectMapper.getTypeFactory().constructCollectionType(List.class, Produto.class));
         } catch (IOException e){
             System.out.println("Erro ao salvar o arquivo: "+e.getMessage());
