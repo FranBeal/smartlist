@@ -958,7 +958,43 @@ Após adicionar uma dependência no arquivo `pom.xml`, é necessário realizar a
 
 
 ### Configurando a Classe Produto
-Para que o `Jackson` consiga realizar a desserialização (converter JSON para um objeto Java), a classe Produto deve ter um construtor padrão (sem argumentos). Esse construtor é necessário para o Jackson criar uma instância da classe e preencher os campos usando os setters ou acessar diretamente os campos (mesmo que sejam privados) usando reflexão.
+
+Para que o Jackson consiga realizar a desserialização (converter JSON para um objeto Java), a classe Produto deve possuir um construtor padrão (sem argumentos). Esse construtor é essencial, pois permite que o Jackson crie uma instância da classe e preencha seus campos utilizando os métodos setters ou acessando diretamente os atributos — mesmo que sejam privados — por meio de reflection.
+
+No caso da serialização JSON, a biblioteca Jackson não exige que a classe implemente a interface Serializable. Portanto, adicionar Serializable na classe Produto é redundante e desnecessário para o funcionamento do Jackson. No entanto, neste projeto optamos por manter a implementação de Serializable, pois também utilizamos serialização binária (gravação em arquivos binários), a qual depende dessa interface. Removê-la comprometeria essa funcionalidade.
+
+#### Requisitos para uso do Jackson com JSON
+
+A serialização e desserialização com Jackson requerem apenas:
+- Um construtor padrão (sem parâmetros);
+- Getters públicos, usados durante a serialização (objeto Java → JSON);
+- Setters públicos, usados durante a desserialização (JSON → objeto Java).
+
+#### Uso de Reflection pelo Jackson
+Quando dizemos que o Jackson utiliza reflection para serializar e desserializar objetos JSON, estamos nos referindo à capacidade da biblioteca de acessar dinamicamente os atributos e métodos de uma classe Java, sem precisar conhecer sua estrutura em tempo de compilação. Reflection é um recurso do Java que permite:
+- Inspecionar classes, métodos, campos e construtores em tempo de execução;
+- Modificar ou invocar comportamentos, mesmo que sejam privados (com as devidas permissões);
+- Criar objetos dinamicamente.
+
+#### Exemplo de como o Jackson utiliza Reflection: 
+```java
+ObjectMapper mapper = new ObjectMapper();
+String json = mapper.writeValueAsString(pessoa);  // Serializa para JSON
+Pessoa pessoa = mapper.readValue(json, Pessoa.class);  // Desserializa de JSON
+```
+#### Durante a serialização (Java → JSON):
+- Analisa a classe Pessoa usando reflection;
+- Lista os métodos getters (ex: getNome(), getIdade());
+- Invoca os getters para obter os valores dos atributos;
+- Mapeia os nomes dos métodos para chaves JSON (ex: getNome() → "nome").
+
+#### Durante a desserialização (JSON → Java):
+- Analisa a classe Pessoa usando reflection;
+- Procura por setters ou campos correspondentes às chaves do JSON;
+- Cria uma nova instância da classe (usando o construtor padrão);
+- Define os valores nos atributos usando os setters ou acesso direto aos campos.
+
+Dessa forma, o Jackson consegue manipular qualquer classe Java de forma automática, sem a necessidade de código gerado manualmente.
 
 #### Classe Produto
 
