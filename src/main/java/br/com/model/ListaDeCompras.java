@@ -12,7 +12,7 @@ public class ListaDeCompras {
     private List<Produto> produtos;
     private PersistenciaStrategy estrategiaPersistencia;
 
-    public ListaDeCompras() {
+    private ListaDeCompras() {
         produtos = new ArrayList<>();
     }
 
