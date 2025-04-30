@@ -1447,7 +1447,11 @@ Realizar testes como: adicionar produtos na lista, acessar a funcionalidade 10, 
 
 ## Melhorando/Refatorando o Código
 
-É possível melhorar o códogo da SmartList construído até o momento. Uma dessas melhorias é a aplicação do padrão de projeto `Singleton`, para garantir que apenas uma instância da lista de compras seja criada durante a execução do programa. Para isso, as seguintes modificações devem ser feitas:
+É possível melhorar o códogo da SmartList construído até o momento. Uma dessas melhorias é a aplicação do padrão de projeto `Singleton`, para garantir que apenas uma instância da lista de compras seja criada durante a execução do programa. O primeiro passo é modificar o contrutor padrão para privado, para prevenir que outros objetos chamem o `new` da classe `Singleton`. O segundo passo é criar um método estático que atuará como um construtor, por exemplo, `getInstancia()`. Esse método chama o construtor privado para criar um objeto e o salva em um campo estático, por exemplo, o campo `instância`. Todas as chamadas seguintes para esse método retornam o objeto salvo em `instancia`.
+
+Recomenda-se o Padrão `Singleton` quando uma classe deve ter apenas uma instância disponível para todos os seus clientes. Exemplo: objeto de base de dados único compartilhado por diferentes partes de um programa. 
+
+A seguir, as modificações a serem feitas:
 
 #### Classe ListaDeCompras
 ```java
@@ -1455,7 +1459,7 @@ public class ListaDeCompras {
     private static ListaDeCompras instancia;
     private List<Produto> produtos;
 
-    public ListaDeCompras() {
+    private ListaDeCompras() {
         produtos = new ArrayList<>();
     }
 
@@ -1481,7 +1485,11 @@ public class Main {
 }
 ```
 
-Outra melhoria possível é permitir que o usuário escolha dinamicamente o método de persistência (texto, binário, JSON ), para isso, pode-se usar o padrão Strategy para encapsular cada método em uma classe separada. Para isso, será criada a interface `PersistenciaStrategy` a seguir:
+Outra melhoria possível é permitir que o usuário escolha dinamicamente o método de persistência (texto, binário, JSON ), para isso, pode-se usar o padrão `Strategy` para encapsular cada método em uma classe separada. 
+
+Recomenda-se o Padrão `Strategy` quando se quer usar diferentes variantes de um algoritmo dentro de um objeto e poder trocar de um algoritmo para outro durante a execução.
+
+A seguir, criando a interface `PersistenciaStrategy`:
 
 #### Interface PersistenciaStrategy
 
@@ -1641,7 +1649,7 @@ public class ListaDeCompras {
 }
 ```
 
-#### Classe ListaDeCompras
+#### Classe ListaDeComprasController
 
 ```java
 public class ListaDeComprasController {
