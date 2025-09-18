@@ -2,7 +2,7 @@
 
 ## Introdução
 
-Este documento tem como objetivo guiar os estudantes na construção de um projeto Java chamado **SmartList**, que é um gerenciador de lista de compras. O projeto foi desenvolvido para ensinar conceitos importantes como manipulação de arquivos (texto, binário e JSON), serialização de objetos e o uso de **Streams** para manipulação de coleções. Além disso, serão abordados padrões de projeto como **MVC (Model-View-Controller)**, **Singleton** e **Strategy**.
+Este documento tem como objetivo guiar os estudantes na construção de um projeto Java chamado **SmartList**, que é um gerenciador de lista de compras. O projeto foi desenvolvido para ensinar conceitos importantes como manipulação de arquivos (texto, binário e JSON), serialização de objetos e o uso de **Streams** para manipulação de coleções. Além disso, serão abordados padrões como **MVC (Model-View-Controller)** -arquitetural, **Singleton** e **Strategy** - de projetos.
 
 O projeto é estruturado em uma aplicação Java desktop com interação por linha de comando, onde os estudantes poderão adicionar, remover, salvar e carregar produtos de uma lista de compras, além de aplicar filtros e cálculos sobre os dados.
 
@@ -16,7 +16,7 @@ O projeto **SmartList** tem como objetivo prático ensinar os seguintes conceito
 3. **Serialização de Objetos**
 4. **Leitura e Escrita em Arquivos JSON**
 5. **Manipulação de Coleções com Streams**
-6. **Padrões de Projeto (MVC, Singleton e Strategy)**
+6. **Padrões arquitetural e de projeto(MVC, Singleton e Strategy)**
 
 ---
 ## Requisitos Técnicos
@@ -1716,7 +1716,7 @@ Neste projeto, aprendemos a manipular arquivos de texto, binários e JSON, além
    - Manipulação de coleções de forma declarativa e funcional.
    - Operações como `filter`, `map`, `sorted` e `reduce` para processar dados de forma eficiente.
 
-4. **Padrões de Projeto:**
+4. **Padrões Arquitetural e de Projeto:**
    - **MVC (Model-View-Controller):** Separação de responsabilidades entre model (dados), view (interface) e controller (lógica).
    - **Singleton:** Garantia de que apenas uma instância de uma classe seja criada durante a execução do programa.
    - **Strategy:** Encapsulamento de cada método de persistência (texto, binário, JSON) em uma classe separada.
